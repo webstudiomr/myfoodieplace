@@ -15,6 +15,13 @@ export default async function handler(req, res) {
   try {
     if (req.method === "GET") {
       let rows = await db("menu_items", "select=*&order=created_at.asc");
+      const starterDeals = [
+        {id:"deal-pizza-party",name:"Pizza Party Deal",category:"Combo Deal",price:1499,description:"2 × Large Pizzas + 2 × Cold Drinks",image:"https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=85",available:true},
+        {id:"deal-burger-box",name:"Burger Box",category:"Combo Deal",price:1099,description:"2 × Chicken Burgers + 1 × Large Fries + 2 × Cold Drinks",image:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=85",available:true},
+        {id:"deal-family-feast",name:"Family Feast",category:"Combo Deal",price:2199,description:"1 × Large Pizza + 2 × Burgers + 4 × Cold Drinks",image:"https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&w=900&q=85",available:true}
+      ];
+      await db("menu_items", "on_conflict=id", {method:"POST",body:starterDeals,prefer:"resolution=ignore-duplicates,return=minimal"});
+      rows = await db("menu_items", "select=*&order=created_at.asc");
       if (!rows.length) {
         await db("menu_items", "on_conflict=id", {method:"POST",body:starterMenu,prefer:"resolution=ignore-duplicates,return=representation"});
         rows = await db("menu_items", "select=*&order=created_at.asc");
