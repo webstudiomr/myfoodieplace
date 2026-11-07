@@ -4,24 +4,11 @@ export default async function handler(req, res) {
   try {
     if (!requireMethod(req, res, ["GET"])) return;
     res.setHeader("Cache-Control", "no-store, max-age=0");
-    const phone = String(req.query?.phone || "").trim();
-    if (!/^03\d{9}$/.test(phone)) {
-      return send(res, 400, { error: "Enter a Pakistani mobile number with exactly 11 digits, starting with 03." });
+    const token = String(req.query?.token || "").trim();
+    if (!/^[a-f0-9]{32}$/.test(token)) {
+      return send(res, 400, {error:"Enter the private tracking code from your order confirmation."});
     }
-    // Match the exact phone string used at checkout. Only return tracking-safe fields.
-    const rows = await db(
-      "orders",
-      `phone=eq.${encodeURIComponent(phone)}&select=id,status,date,total,created_at&order=created_at.desc&limit=20`
-    );
-    return send(res, 200, {
-      orders: (rows || []).map(order => ({
-        id: order.id,
-        status: order.status,
-        date: order.date || order.created_at,
-        total: Number(order.total || 0)
-      }))
-    });
-  } catch (error) {
-    return fail(res, error);
-  }
+    const rows = await db("orders", `tracking_token=eq.${encodeURIComponent(token)}&select=id,status,date,total,created_at&limit=1`);
+    return send(res, 200, {orders:(rows||[]).map(order=>({id:order.id,status:order.status,date:order.date||order.created_at,total:Number(order.total||0)}))});
+  } catch (error) { return fail(res, error); }
 }
