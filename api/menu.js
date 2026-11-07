@@ -1,4 +1,4 @@
-import { db, fail, requireAdmin, requireMethod, send } from "./_lib/db.js";
+import { db, fail, requireAdmin, requireMethod, send } from "../lib/db.js";
 
 const starterMenu = [
   {id:"pizza",name:"Margherita Pizza",category:"Pizza",price:899,description:"Classic cheese, tomato and basil.",image:"https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&w=800&q=80",available:true},
