@@ -63,9 +63,8 @@
 
     <section class="view" id="view-images">
       <div class="page-head"><div><h1>Image Library</h1><p>Keep food photos here, then reuse them on menu cards.</p></div><label class="btn upload-label" for="libraryUpload">＋ Add Images<input id="libraryUpload" type="file" accept="image/*" multiple hidden></label></div>
-      <div class="notice"><strong>Vercel Blob cloud image library</strong>Images uploaded here are stored online and can be reused from other devices. Connect with the private image-library key configured in Vercel. Existing browser-only images can be migrated when you connect.
-        <div class="image-cloud-controls"><label class="sr-only" for="blobAdminKey">Cloud image-library key</label><input id="blobAdminKey" type="password" autocomplete="current-password" placeholder="Enter cloud image-library key" aria-label="Cloud image-library key"><button class="btn secondary" id="connectImageStorage" type="button">Connect storage</button><button class="btn secondary small" id="disconnectImageStorage" type="button">Disconnect</button></div>
-        <p class="small-note" id="imageStorageStatus" aria-live="polite">Cloud storage is not connected in this browser session.</p>
+      <div class="notice"><strong>Vercel Blob cloud image library</strong>Images uploaded here are stored online and can be reused from other devices. Uploads use your secure admin session; no separate image key is needed. Existing browser-only images can be migrated when you connect.
+        <p class="small-note" id="imageStorageStatus" aria-live="polite">Sign in to the admin dashboard to upload and manage cloud images.</p>
       </div>
       <div class="panel"><div class="panel-head"><h2>Saved Images</h2><span class="small-note" id="imageCount">0 images</span></div><div class="image-library-grid" id="imageLibraryGrid"></div><div class="empty" id="imageLibraryEmpty">No images yet. Use “Add Images” to upload food photos.</div></div>
     </section>
