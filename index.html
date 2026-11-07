@@ -13,7 +13,7 @@
 <main>
 <section class="premium-hero"><div class="container premium-hero-grid">
 <div class="premium-copy"><span class="eyebrow">Welcome to Foodie Place</span><h1>Made with love.<br><em>Served with flavour.</em></h1><p>Discover the dishes everyone loves. Browse our menu, choose your favourites and order in just a few clicks.</p>
-<div class="premium-actions"><a class="btn" href="menu.html">Explore the menu <span>→</span></a><a class="text-link" href="track-order.html">Already ordered? Track it</a></div>
+<div class="premium-actions"><a class="btn" href="menu.html">Explore the menu <span>→</span></a><a class="text-link" href="track-order.html">Already ordered? Track it</a><a class="text-link" id="heroWhatsApp" href="#" target="_blank" rel="noopener">Chat on WhatsApp</a></div>
 <div class="hero-highlights"><span><b>✦</b> Freshly prepared</span><span><b>✦</b> Easy online ordering</span></div></div>
 <div class="premium-visual"><img src="https://images.unsplash.com/photo-1546549032-9571cd6b27df?auto=format&fit=crop&w=1100&q=85" alt="A delicious restaurant meal"><div class="visual-sticker"><strong>Food made</strong><span>to make you smile</span></div></div>
 </div></section>
@@ -37,7 +37,7 @@
 <div class="field"><label for="customerPhone">Pakistani mobile number *</label><input id="customerPhone" required type="tel" inputmode="numeric" maxlength="11" minlength="11" pattern="03[0-9]{9}" autocomplete="tel-national" placeholder="03XXXXXXXXX" title="Enter exactly 11 digits starting with 03."><small>11 digits, starting with 03</small></div>
 <div class="field"><label for="customerAddress">Delivery address *</label><textarea id="customerAddress" required rows="3" maxlength="400" autocomplete="street-address" placeholder="House, street, area and city"></textarea></div>
 <div class="field"><label>Delivery location (optional)</label><button class="btn outline" type="button" id="shareLocation" style="width:100%">📍 Share my location</button><small id="locationStatus">Your location is shared only if you allow access.</small></div>
-<div class="field"><label for="customerNotes">Order instructions (optional)</label><textarea id="customerNotes" rows="2" maxlength="300" placeholder="Any special instructions?"></textarea></div>
+<div class="field"><label for="customerNotes">Order instructions (optional)</label><textarea id="customerNotes" rows="2" maxlength="300" placeholder="Any special instructions?"></textarea></div><p class="checkout-whatsapp-note">Prefer WhatsApp? You can confirm your order directly with our team.</p><button class="btn outline" type="button" id="whatsappCheckout">Continue on WhatsApp</button>
 <div class="checkout-actions"><button class="btn outline" type="button" id="backToCart">Back</button><button class="btn" type="submit">Place order</button></div></form>
 </aside></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="script.js"></script></body></html>
