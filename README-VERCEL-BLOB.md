@@ -70,3 +70,12 @@ Changes pushed to the `main` branch trigger a Vercel deployment. Wait for the de
 - Replace sample menu items, images, deal contents and prices with the restaurant's real offer.
 - Test one order end-to-end, including WhatsApp, delivery fee, admin order details, status changes and private tracking.
 - Test mobile widths and real devices. A successful GitHub commit does not itself prove that the Vercel deployment or live database is working.
+
+
+## Secure admin sessions and image uploads
+- Admin sign-in exchanges `FOODIE_ADMIN_KEY` for an 8-hour signed HttpOnly, SameSite=Strict cookie. The key is not stored in browser storage.
+- Admin APIs require the signed cookie. The OTP feature's existing logic is unchanged.
+- Image upload/list/delete uses the same authenticated admin session; no separate image key is required.
+- Browser-side image resizing is followed by server-side MIME and 4 MB compressed-image checks.
+- Images are public-read so menu photos can display to customers; upload, list and delete require admin authentication.
+- Configure `BLOB_READ_WRITE_TOKEN` in Vercel as a server-only environment variable. Never expose it in frontend code.
