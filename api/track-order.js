@@ -9,7 +9,7 @@ function verifiedPhone(token) {
     const a = Buffer.from(signature), b = Buffer.from(expected);
     if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
     const data = JSON.parse(Buffer.from(payload, "base64url").toString());
-    if (!data.phone || !/^03\\d{9}$/.test(data.phone) || Number(data.exp) < Date.now()) return null;
+    if (!data.phone || !/^03\d{9}$/.test(data.phone) || Number(data.exp) < Date.now()) return null;
     return data.phone;
   } catch { return null; }
 }
