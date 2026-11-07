@@ -17,7 +17,7 @@ const defaultSettings={name:"Foodie Place",tagline:"Restaurant & Cafe",phone:"+9
 function readStore(key,fallback){try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):structuredClone(fallback)}catch(e){return structuredClone(fallback)}}
 let menu=readStore(MENU_KEY,defaultMenu),settings=readStore(SETTINGS_KEY,defaultSettings),cart={};let activeCategory="All",toastTimer;
 const $=id=>document.getElementById(id);
-async function adminRequest(path,options={}){let key=sessionStorage.getItem("foodie_admin_key")||"";const protectedCall=options.protected!==false;if(protectedCall&&!key){key=prompt("Enter your private FOODIE_ADMIN_KEY to access restaurant administration:")||"";if(!key)throw new Error("Admin key is required.");sessionStorage.setItem("foodie_admin_key",key)}const headers={...(options.body?{"Content-Type":"application/json"}:{}),...(key?{"x-admin-key":key}:{})};const response=await fetch(path,{method:options.method||"GET",headers,...(options.body?{body:JSON.stringify(options.body)}:{})});let data={};try{data=await response.json()}catch(_){}if(response.status===401){sessionStorage.removeItem("foodie_admin_key");throw new Error("Admin key rejected. Reload the page and enter the correct FOODIE_ADMIN_KEY.")}if(!response.ok)throw new Error(data.error||"Server request failed.");return data}
+
 function safe(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function money(n){return `${settings.currency||"Rs."} ${Number(n||0).toLocaleString("en-PK")}`}
 function notify(s){$("toast").textContent=s;$("toast").classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>$("toast").classList.remove("show"),2700)}
@@ -55,6 +55,8 @@ function load(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.
 let menu=load(KEY_MENU,sampleMenu),orders=load(KEY_ORDERS,[]),settings=load(KEY_SETTINGS,defaultSettings),imageLibrary=[];
 let toastTimer;
 const $=id=>document.getElementById(id);
+async function adminRequest(path,options={}){let key=sessionStorage.getItem("foodie_admin_key")||"";const protectedCall=options.protected!==false;if(protectedCall&&!key){key=prompt("Enter your private FOODIE_ADMIN_KEY to access restaurant administration:")||"";if(!key)throw new Error("Admin key is required.");sessionStorage.setItem("foodie_admin_key",key)}const headers={...(options.body?{"Content-Type":"application/json"}:{}),...(key?{"x-admin-key":key}:{})};const response=await fetch(path,{method:options.method||"GET",headers,...(options.body?{body:JSON.stringify(options.body)}:{})});let data={};try{data=await response.json()}catch(_){}if(response.status===401){sessionStorage.removeItem("foodie_admin_key");throw new Error("Admin key rejected. Reload the page and enter the correct FOODIE_ADMIN_KEY.")}if(!response.ok)throw new Error(data.error||"Server request failed.");return data}
+
 function saveAll(){try{localStorage.setItem(KEY_MENU,JSON.stringify(menu));localStorage.setItem(KEY_ORDERS,JSON.stringify(orders));localStorage.setItem(KEY_SETTINGS,JSON.stringify(settings));return true}catch(e){notify("Could not save. Browser storage may be full.");return false}}
 function money(n){return `${settings.currency||"Rs."} ${Number(n||0).toLocaleString("en-PK")}`}
 function escapeHTML(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
