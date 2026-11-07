@@ -1,6 +1,6 @@
 import { db, fail, requireAdmin, requireMethod, send } from "../lib/db.js";
 
-const defaults = {id:1,name:"Foodie Place",tagline:"Restaurant & Cafe",phone:"+92 300 1234567",whatsapp_phone:"",email:"hello@yourrestaurant.com",address:"Lahore, Pakistan",hours:"12 PM – 11 PM",currency:"Rs.",logo:""};
+const defaults = {id:1,name:"Foodie Place",tagline:"Restaurant & Cafe",phone:"",whatsapp_phone:"",email:"",address:"Lahore, Pakistan",hours:"12 PM – 11 PM",currency:"Rs.",logo:"",delivery_fee:0,minimum_order:0,estimated_delivery:"30–45 minutes",is_open:true};
 
 export default async function handler(req, res) {
   try {
