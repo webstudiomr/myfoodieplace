@@ -1,4 +1,4 @@
-import { db, fail, requireAdmin, requireMethod, send } from "./_lib/db.js";
+import { db, fail, requireAdmin, requireMethod, send } from "../lib/db.js";
 
 const defaults = {id:1,name:"Foodie Place",tagline:"Restaurant & Cafe",phone:"+92 300 1234567",email:"hello@yourrestaurant.com",address:"Lahore, Pakistan",hours:"12 PM – 11 PM",currency:"Rs.",logo:""};
 
