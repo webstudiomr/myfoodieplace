@@ -5,8 +5,8 @@ export default async function handler(req, res) {
     if (!requireMethod(req, res, ["GET"])) return;
     res.setHeader("Cache-Control", "no-store, max-age=0");
     const phone = String(req.query?.phone || "").trim();
-    if (!phone || phone.length > 30) {
-      return send(res, 400, { error: "Please enter the phone number used when placing your order." });
+    if (!/^03\\d{9}$/.test(phone)) {
+      return send(res, 400, { error: "Enter a Pakistani mobile number with exactly 11 digits, starting with 03." });
     }
     // Match the exact phone string used at checkout. Only return tracking-safe fields.
     const rows = await db(
