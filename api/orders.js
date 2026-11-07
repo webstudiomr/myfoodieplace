@@ -10,7 +10,7 @@ export default async function handler(req, res) {
       const phone = String(body.phone || "").trim();
       const address = String(body.address || "").trim();
       const location = body.location || null;
-      if (!customer || customer.length > 100 || !/^[\p{L}]+(?:[ '\u2019-][\p{L}]+)*$/u.test(customer)) {
+      if (!customer || customer.length > 100 || !/^[\p{L}]+(?: [\p{L}]+)*$/u.test(customer)) {
         return send(res, 400, {error:"Please enter a valid name using letters only."});
       }
       if (!/^03\d{9}$/.test(phone)) {
