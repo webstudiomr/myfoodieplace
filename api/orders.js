@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       if (subtotal < Number(settings.minimum_order || 0)) return send(res, 400, {error:"Your order is below the minimum order amount of Rs. "+Number(settings.minimum_order).toLocaleString("en-PK")+"."});
       const deliveryFee = Number(settings.delivery_fee || 0);
       const total = subtotal + deliveryFee;
-      const id = "FP-" + Date.now().toString(36).toUpperCase();
+      const id = "FP-" + randomUUID().slice(0,8).toUpperCase();
       const trackingToken = randomUUID().replace(/-/g,"");
       const order = {id,customer,phone,address:savedAddress,notes,items,subtotal,delivery_fee:deliveryFee,total,tracking_token:trackingToken,status:"Pending",date:new Date().toISOString()};
       await db("orders", "", {method:"POST",body:order,prefer:"return=representation"});
