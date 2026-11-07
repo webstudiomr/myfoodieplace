@@ -636,3 +636,10 @@ body.home-page .home-favourites .section-intro{margin-bottom:34px}
  .deal-add{padding:8px 6px}
 }
 @media(prefers-reduced-motion:reduce){.deal-card,.deal-add{transition:none}}
+
+/* WhatsApp contact shortcut */
+.foodie-whatsapp{position:fixed;right:20px;bottom:20px;z-index:50;display:none;align-items:center;gap:9px;padding:13px 19px;border-radius:999px;background:#168b54;color:#fff!important;text-decoration:none;font-size:13px;font-weight:850;box-shadow:0 12px 30px #1113;transition:transform .2s,box-shadow .2s}
+.foodie-whatsapp:before{content:"";width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px #ffffff35}
+.foodie-whatsapp:hover{transform:translateY(-3px);box-shadow:0 16px 34px #1114}
+.checkout-whatsapp-note{margin:12px 0 6px;color:#6f6b72;font-size:12px;line-height:1.5}
+@media(max-width:520px){.foodie-whatsapp{right:12px;bottom:12px;padding:11px 15px;font-size:12px}.checkout-whatsapp-note{font-size:11px}}
