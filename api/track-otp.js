@@ -1,8 +1,8 @@
 import { createHash, createHmac, randomInt, randomUUID, timingSafeEqual } from "node:crypto";
 import { db, fail, requireAdmin, requireMethod, send } from "../lib/db.js";
 
-const cleanPhone = value => String(value || "").replace(/\\D/g, "");
-const validPhone = phone => /^03\\d{9}$/.test(phone);
+const cleanPhone = value => String(value || "").replace(/\D/g, "");
+const validPhone = phone => /^03\d{9}$/.test(phone);
 const secret = () => process.env.FOODIE_ADMIN_KEY || "";
 const hashCode = (id, code) => createHash("sha256").update(id + ":" + code + ":" + secret()).digest("hex");
 const sessionFor = phone => {
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     }
     if (body.action === "verify") {
       const phone = cleanPhone(body.phone), code = String(body.code || "").trim();
-      if (!validPhone(phone) || !/^\\d{6}$/.test(code)) return send(res, 400, { error: "Enter your phone number and the 6-digit code." });
+      if (!validPhone(phone) || !/^\d{6}$/.test(code)) return send(res, 400, { error: "Enter your phone number and the 6-digit code." });
       const rows = await db("order_tracking_otps", "select=id,phone,otp_hash,expires_at,attempts,status&phone=eq." + encodeURIComponent(phone) + "&status=eq.sent&order=created_at.desc&limit=1");
       const row = rows?.[0];
       if (!row || !row.otp_hash || new Date(row.expires_at).getTime() < Date.now()) return send(res, 400, { error: "That code has expired or is not available. Request a new code." });
