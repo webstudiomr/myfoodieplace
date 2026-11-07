@@ -108,7 +108,7 @@
     <form id="dealForm"><input type="hidden" id="dealId"><div class="form-grid">
       <div class="field"><label for="dealName">Deal name *</label><input id="dealName" required maxlength="90" placeholder="Pizza Party Deal"></div>
       <div class="field"><label for="dealPrice">Special combo price (Rs.) *</label><input id="dealPrice" type="number" min="0" step="1" required placeholder="1499"></div>
-      <div class="field full"><label for="dealDescription">What's included? Add quantities *</label><textarea id="dealDescription" rows="3" maxlength="240" required placeholder="2 × Large Pizza + 2 × Cold Drinks"></textarea><small>Write the exact combo contents customers will receive.</small></div>
+      <div class="field full"><label for="dealDescription">Customer-facing deal description *</label><textarea id="dealDescription" rows="2" maxlength="240" required placeholder="2 × Large Pizza + 2 × Cold Drinks"></textarea></div><div class="field full"><label for="dealKitchenItems">Kitchen item breakdown (optional)</label><textarea id="dealKitchenItems" rows="3" placeholder="2 x Large Pizza&#10;2 x Cold Drink"></textarea><small>List exact quantities for the kitchen. This breakdown is saved with customer orders.</small></div>
       <div class="field"><label for="dealAvailable">Deal status</label><select id="dealAvailable"><option value="true">Show on website</option><option value="false">Hide deal</option></select></div>
       <div class="field"><label for="dealImage">Deal photo URL</label><input id="dealImage" type="url" placeholder="https://example.com/combo.jpg"></div>
     </div><div class="modal-actions"><button type="button" class="btn secondary" data-close="dealModal">Cancel</button><button type="submit" class="btn">Save Deal</button></div></form>
