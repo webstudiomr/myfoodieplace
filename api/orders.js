@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db, fail, requireAdmin, requireMethod, send } from "../lib/db.js";
 
 const statuses = new Set(["Pending","Preparing","Ready","Delivered","Cancelled"]);
@@ -10,6 +11,8 @@ export default async function handler(req, res) {
       const phone = String(body.phone || "").trim();
       const address = String(body.address || "").trim();
       const location = body.location || null;
+      const notes = String(body.notes || "").trim();
+      if (notes.length > 300) return send(res, 400, {error:"Order instructions must be 300 characters or fewer."});
       if (!customer || customer.length > 100 || !/^[\p{L}]+(?: [\p{L}]+)*$/u.test(customer)) {
         return send(res, 400, {error:"Please enter a valid name using letters only."});
       }
@@ -32,20 +35,29 @@ export default async function handler(req, res) {
         const id = String(row?.id || "");
         const quantity = Number(row?.quantity);
         if (!id || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) return send(res, 400, {error:"Invalid order item or quantity."});
-        requested.set(id, (requested.get(id) || 0) + quantity);
+        const combined = (requested.get(id) || 0) + quantity;
+        if (combined > 20) return send(res, 400, {error:"Maximum quantity per dish is 20."});
+        requested.set(id, combined);
       }
-      const menu = await db("menu_items", "select=id,name,price,available");
+      const menu = await db("menu_items", "select=id,name,price,available,category,description,deal_items");
       const items = [];
       for (const [id, quantity] of requested) {
         const dish = menu.find(item => item.id === id && item.available);
         if (!dish) return send(res, 400, {error:"One or more selected dishes are unavailable. Please refresh your menu."});
-        items.push({id:dish.id,name:dish.name,price:Number(dish.price),quantity});
+        items.push({id:dish.id,name:dish.name,price:Number(dish.price),quantity,...(dish.category==="Combo Deal"?{is_deal:true,description:dish.description||"",components:Array.isArray(dish.deal_items)?dish.deal_items:[]}:{})});
       }
-      const total = items.reduce((sum,item) => sum + item.price * item.quantity, 0);
+      const subtotal = items.reduce((sum,item) => sum + item.price * item.quantity, 0);
+      const settingRows = await db("restaurant_settings", "select=delivery_fee,minimum_order,is_open&id=eq.1&limit=1");
+      const settings = settingRows?.[0] || {};
+      if (settings.is_open === false) return send(res, 400, {error:"The restaurant is currently closed. Please contact us on WhatsApp for assistance."});
+      if (subtotal < Number(settings.minimum_order || 0)) return send(res, 400, {error:"Your order is below the minimum order amount of Rs. "+Number(settings.minimum_order).toLocaleString("en-PK")+"."});
+      const deliveryFee = Number(settings.delivery_fee || 0);
+      const total = subtotal + deliveryFee;
       const id = "FP-" + Date.now().toString(36).toUpperCase();
-      const order = {id,customer,phone,address:savedAddress,items,total,status:"Pending",date:new Date().toISOString()};
+      const trackingToken = randomUUID().replace(/-/g,"");
+      const order = {id,customer,phone,address:savedAddress,notes,items,subtotal,delivery_fee:deliveryFee,total,tracking_token:trackingToken,status:"Pending",date:new Date().toISOString()};
       await db("orders", "", {method:"POST",body:order,prefer:"return=representation"});
-      return send(res, 201, {order:{id,total,status:"Pending"}});
+      return send(res, 201, {order:{id,total,status:"Pending",tracking_token:trackingToken}});
     }
     if (req.method === "GET") {
       if (!requireAdmin(req, res)) return;
