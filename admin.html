@@ -73,15 +73,12 @@
       <div class="page-head"><div><h1>Restaurant Settings</h1><p>Update the business details shown in your admin records.</p></div></div>
       <div class="panel"><div class="panel-head"><h2>Business Information</h2></div>
         <form id="settingsForm" class="form-grid">
-          <div class="field"><label for="restaurantName">Restaurant name</label><input id="restaurantName" required></div>
-          <div class="field"><label for="restaurantTagline">Tagline</label><input id="restaurantTagline" placeholder="Restaurant & Cafe"></div>
-          <div class="field"><label for="restaurantPhone">Call phone number</label><input id="restaurantPhone" placeholder="+92 300 1234567"></div><div class="field"><label for="restaurantWhatsApp">WhatsApp number (international format)</label><input id="restaurantWhatsApp" placeholder="923001234567" inputmode="numeric"><small>Use country code, without spaces. Example: 923001234567</small></div>
-          <div class="field"><label for="restaurantEmail">Email</label><input id="restaurantEmail" type="email" placeholder="hello@example.com"></div>
-          <div class="field full"><label for="restaurantAddress">Address</label><input id="restaurantAddress" placeholder="Street, city, country"></div>
-          <div class="field"><label for="restaurantHours">Opening hours</label><input id="restaurantHours" placeholder="12 PM – 11 PM"></div><div class="field"><label for="deliveryFee">Delivery fee (Rs.)</label><input id="deliveryFee" type="number" min="0" step="1" value="0"></div><div class="field"><label for="minimumOrder">Minimum order (Rs.)</label><input id="minimumOrder" type="number" min="0" step="1" value="0"></div><div class="field"><label for="estimatedDelivery">Estimated delivery time</label><input id="estimatedDelivery" maxlength="80" placeholder="30–45 minutes"></div><div class="field"><label for="restaurantOpen">Restaurant availability</label><select id="restaurantOpen"><option value="true">Open for orders</option><option value="false">Temporarily closed</option></select></div>
-          <div class="field"><label for="currency">Currency label</label><select id="currency"><option value="Rs.">Rs. (Pakistani Rupee)</option><option value="$">$ (US Dollar)</option><option value="£">£ (Pound)</option><option value="€">€ (Euro)</option></select></div>
-          <div class="field full"><label for="restaurantLogo">Logo image URL (optional)</label><input id="restaurantLogo" type="url" placeholder="https://..."></div>
-          <div class="field full"><button class="btn" type="submit">Save Settings</button><p class="small-note">These settings are saved to the shared Supabase database and appear on the customer website.</p></div>
+          <div class="field"><label for="restaurantPhone">Call phone number</label><input id="restaurantPhone" type="tel" placeholder="+92 300 1234567"></div>
+          <div class="field"><label for="restaurantWhatsApp">WhatsApp number (international format)</label><input id="restaurantWhatsApp" inputmode="numeric" placeholder="923001234567"><small>Use country code without spaces. Example: 923001234567</small></div>
+          <div class="field"><label for="restaurantEmail">Email address</label><input id="restaurantEmail" type="email" placeholder="hello@example.com"></div>
+          <div class="field"><label for="restaurantHours">Opening hours</label><input id="restaurantHours" placeholder="12 PM – 11 PM"></div>
+          <div class="field full"><label for="restaurantAddress">Restaurant address</label><input id="restaurantAddress" placeholder="Street, city, country"></div>
+          <div class="field full"><button class="btn" type="submit">Save Contact Details</button><p class="small-note">Only phone, WhatsApp, email, address and opening hours can be changed here. Restaurant name, logo, currency and ordering settings are protected.</p></div>
         </form>
       </div>
       <div class="panel"><div class="panel-head"><h2>Data Tools</h2></div><p class="small-note">Export the menu, settings, and orders currently loaded from the shared database as a JSON backup.</p><div class="toolbar" style="margin-top:14px"><button class="btn secondary" id="exportData">Export backup (JSON)</button><button class="btn danger" id="clearOrders">Orders retained online</button></div></div>
