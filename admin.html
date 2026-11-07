@@ -15,6 +15,7 @@
   <nav class="nav" id="nav">
     <button class="active" data-view="dashboard"><span class="ico">▦</span> Dashboard</button>
     <button data-view="menu"><span class="ico">🍽</span> Menu Management</button>
+    <button data-view="deals"><span class="ico">🔥</span> Hot Deals</button>
     <button data-view="orders"><span class="ico">🧾</span> Customer Orders <span id="navOrderCount" class="pill" style="margin-left:auto;padding:3px 7px">0</span></button>
     <button data-view="images"><span class="ico">🖼️</span> Image Library</button>
     <button data-view="settings"><span class="ico">⚙</span> Restaurant Settings</button>
@@ -45,6 +46,12 @@
       <div class="page-head"><div><h1>Menu Management</h1><p>Add, edit, price, and organize your menu cards.</p></div><button class="btn" data-action="add-dish">＋ Add New Dish</button></div>
       <div class="panel"><div class="toolbar"><input class="search" id="menuSearch" placeholder="Search dishes..."><select class="search" id="menuCategory" aria-label="Filter category"><option value="All">All categories</option><option>Pizza</option><option>Burger</option><option>Pasta</option><option>Salad</option><option>Dessert</option><option>Drink</option></select><button class="btn secondary" id="resetMenu">Restore sample menu</button></div>
       <div class="table-wrap"><table><thead><tr><th>Dish</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr></thead><tbody id="menuRows"></tbody></table></div><div class="empty" id="menuEmpty">No menu items match your search.</div></div>
+    </section>
+
+    <section class="view" id="view-deals">
+      <div class="page-head"><div><h1>Hot Deals Management</h1><p>Create combo offers with exact quantities, included items, photos and your own selling price.</p></div><button class="btn" data-action="add-deal">＋ Create New Deal</button></div>
+      <div class="panel"><div class="notice"><strong>Combo examples</strong>Pizza Party: 2 Pizzas + 2 Cold Drinks · Burger Box: 2 Burgers + Fries + 2 Drinks · Family Feast: 1 Large Pizza + 4 Drinks. Edit the names, contents and prices to match your restaurant.</div>
+      <div class="table-wrap"><table><thead><tr><th>Deal</th><th>Includes</th><th>Combo price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="dealRows"></tbody></table></div><div class="empty" id="dealsEmpty">No deals yet. Create your first combo offer.</div></div>
     </section>
 
     <section class="view" id="view-orders">
@@ -96,6 +103,17 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="dealModal" role="dialog" aria-modal="true" aria-labelledby="dealModalTitle">
+  <div class="modal"><div class="modal-head"><h2 id="dealModalTitle">Create Hot Deal</h2><button class="close" data-close="dealModal" aria-label="Close">×</button></div>
+    <form id="dealForm"><input type="hidden" id="dealId"><div class="form-grid">
+      <div class="field"><label for="dealName">Deal name *</label><input id="dealName" required maxlength="90" placeholder="Pizza Party Deal"></div>
+      <div class="field"><label for="dealPrice">Special combo price (Rs.) *</label><input id="dealPrice" type="number" min="0" step="1" required placeholder="1499"></div>
+      <div class="field full"><label for="dealDescription">What's included? Add quantities *</label><textarea id="dealDescription" rows="3" maxlength="240" required placeholder="2 × Large Pizza + 2 × Cold Drinks"></textarea><small>Write the exact combo contents customers will receive.</small></div>
+      <div class="field"><label for="dealAvailable">Deal status</label><select id="dealAvailable"><option value="true">Show on website</option><option value="false">Hide deal</option></select></div>
+      <div class="field"><label for="dealImage">Deal photo URL</label><input id="dealImage" type="url" placeholder="https://example.com/combo.jpg"></div>
+    </div><div class="modal-actions"><button type="button" class="btn secondary" data-close="dealModal">Cancel</button><button type="submit" class="btn">Save Deal</button></div></form>
+  </div>
+</div>
 <div class="modal-backdrop" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
   <div class="modal"><div class="modal-head"><h2 id="orderModalTitle">Order Details</h2><button class="close" data-close="orderModal" aria-label="Close">×</button></div><div id="orderDetailBody" class="order-detail"></div><div class="modal-actions"><button class="btn secondary" data-close="orderModal">Close</button></div></div>
 </div>
