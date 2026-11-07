@@ -121,9 +121,8 @@ $("exportData").addEventListener("click",()=>{const blob=new Blob([JSON.stringif
 $("clearOrders").addEventListener("click",()=>notify("For safety, orders are retained in the shared database. Update individual order statuses instead."));
 $("storageLabel").textContent="Connecting to shared Supabase database…";
 renderMenu();renderDealsAdmin();renderOrders();fillSettings();renderImageLibrary();
-(async()=>{try{const [mr,sr,or]=await Promise.all([adminRequest("/api/menu",{protected:false}),adminRequest("/api/settings",{protected:false}),adminRequest("/api/orders")]);menu=mr.items||[];settings=sr.settings||settings;orders=or.orders||[];$("storageLabel").textContent="Connected · shared Supabase database";renderMenu();renderDealsAdmin();renderOrders();fillSettings()}catch(err){$("storageLabel").textContent="Database connection needs attention";notify(err.message)}})();
+(async()=>{try{const [mr,sr,or]=await Promise.all([adminRequest("/api/menu",{protected:false}),adminRequest("/api/settings",{protected:false}),adminRequest("/api/orders")]);menu=mr.items||[];settings=sr.settings||settings;orders=or.orders||[];$("storageLabel").textContent="Connected · shared Supabase database";renderMenu();renderDealsAdmin();renderOrders();fillSettings();refreshOtpRequests()}catch(err){$("storageLabel").textContent="Database connection needs attention";notify(err.message)}})();
 setInterval(async()=>{if(!sessionStorage.getItem("foodie_admin_key"))return;try{const data=await adminRequest("/api/orders");orders=data.orders||[];renderOrders()}catch(err){$("storageLabel").textContent="Database connection needs attention"}},20000);
 setInterval(()=>{if(sessionStorage.getItem("foodie_admin_key"))refreshOtpRequests()},10000);
-refreshOtpRequests();
 
 })();
