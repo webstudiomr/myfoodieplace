@@ -9,8 +9,23 @@ export default async function handler(req, res) {
       const customer = String(body.customer || "").trim();
       const phone = String(body.phone || "").trim();
       const address = String(body.address || "").trim();
-      if (!customer || customer.length > 100 || !phone || phone.length > 30 || !address || address.length > 400 || !Array.isArray(body.items) || !body.items.length || body.items.length > 30) {
-        return send(res, 400, {error:"Please provide your name, phone, address, and order items."});
+      const location = body.location || null;
+      if (!customer || customer.length > 100 || !/^[\p{L}]+(?:[ '\u2019-][\p{L}]+)*$/u.test(customer)) {
+        return send(res, 400, {error:"Please enter a valid name using letters only."});
+      }
+      if (!/^03\d{9}$/.test(phone)) {
+        return send(res, 400, {error:"Enter a Pakistani mobile number with exactly 11 digits, starting with 03."});
+      }
+      if (!address || address.length > 400 || !Array.isArray(body.items) || !body.items.length || body.items.length > 30) {
+        return send(res, 400, {error:"Please provide your delivery address and order items."});
+      }
+      let savedAddress = address;
+      if (location !== null) {
+        const lat = Number(location.lat), lon = Number(location.lon);
+        if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lon) || lon < -180 || lon > 180) {
+          return send(res, 400, {error:"The shared location is invalid. Please share it again or continue without it."});
+        }
+        savedAddress += "\nCustomer shared location: https://www.google.com/maps?q=" + lat + "," + lon;
       }
       const requested = new Map();
       for (const row of body.items) {
@@ -28,7 +43,7 @@ export default async function handler(req, res) {
       }
       const total = items.reduce((sum,item) => sum + item.price * item.quantity, 0);
       const id = "FP-" + Date.now().toString(36).toUpperCase();
-      const order = {id,customer,phone,address,items,total,status:"Pending",date:new Date().toISOString()};
+      const order = {id,customer,phone,address:savedAddress,items,total,status:"Pending",date:new Date().toISOString()};
       await db("orders", "", {method:"POST",body:order,prefer:"return=representation"});
       return send(res, 201, {order:{id,total,status:"Pending"}});
     }
