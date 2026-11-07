@@ -15,21 +15,16 @@ export default async function handler(req, res) {
     if (!requireMethod(req, res, ["POST"])) return;
     if (!requireAdmin(req, res)) return;
     const value = req.body || {};
+    const existingRows = await db("restaurant_settings", "select=*&id=eq.1&limit=1");
+    const existing = existingRows?.[0] || defaults;
     const clean = {
+      ...existing,
       id:1,
-      name:String(value.name || "Foodie Place").trim().slice(0,120),
-      tagline:String(value.tagline || "").slice(0,160),
-      phone:String(value.phone || "").slice(0,40),
-      whatsapp_phone:String(value.whatsapp_phone || "").replace(/[^0-9+]/g,"").slice(0,20),
-      email:String(value.email || "").slice(0,160),
-      address:String(value.address || "").slice(0,400),
-      hours:String(value.hours || "").slice(0,120),
-      currency:String(value.currency || "Rs.").slice(0,8),
-      logo:String(value.logo || "").slice(0,2000),
-      delivery_fee:Math.max(0,Number(value.delivery_fee)||0),
-      minimum_order:Math.max(0,Number(value.minimum_order)||0),
-      estimated_delivery:String(value.estimated_delivery || "30–45 minutes").slice(0,80),
-      is_open:value.is_open !== false,
+      phone:String(value.phone ?? existing.phone ?? "").trim().slice(0,40),
+      whatsapp_phone:String(value.whatsapp_phone ?? existing.whatsapp_phone ?? "").replace(/[^0-9+]/g,"").slice(0,20),
+      email:String(value.email ?? existing.email ?? "").trim().slice(0,160),
+      address:String(value.address ?? existing.address ?? "").trim().slice(0,400),
+      hours:String(value.hours ?? existing.hours ?? "").trim().slice(0,120),
       updated_at:new Date().toISOString()
     };
     const rows = await db("restaurant_settings", "on_conflict=id", {method:"POST",body:clean,prefer:"resolution=merge-duplicates,return=representation"});
