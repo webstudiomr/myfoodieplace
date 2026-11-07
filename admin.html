@@ -27,12 +27,12 @@
     <div class="top-actions"><span class="pill">● Admin workspace</span><div class="avatar">A</div></div>
   </header>
   <div class="content">
-    <div class="notice"><strong>Important: local demo storage</strong>This panel saves changes in this browser on this device. To show edited menu items to every customer and receive orders from their devices, connect a shared backend/database and update your existing <code>index.html</code> to use it. This standalone file does not receive live internet orders.</div>
+    <div class="notice"><strong>Shared database connected</strong>Menu items, restaurant settings, and customer orders are stored online in Supabase. Admin changes require your private FOODIE_ADMIN_KEY, entered when prompted. Keep that key private and do not share it.</div>
 
     <section class="view active" id="view-dashboard">
       <div class="page-head"><div><h1>Welcome back 👋</h1><p>Here's what's happening at your restaurant.</p></div><button class="btn" data-go="menu">＋ Manage Menu</button></div>
       <div class="stats">
-        <div class="stat"><div class="stat-top">Total Orders <span class="stat-icon">🧾</span></div><strong id="statOrders">0</strong><small>Orders saved in this browser</small></div>
+        <div class="stat"><div class="stat-top">Total Orders <span class="stat-icon">🧾</span></div><strong id="statOrders">0</strong><small>Orders stored online</small></div>
         <div class="stat"><div class="stat-top">Revenue <span class="stat-icon">₨</span></div><strong id="statRevenue">Rs. 0</strong><small>From non-cancelled orders</small></div>
         <div class="stat"><div class="stat-top">Pending Orders <span class="stat-icon">◷</span></div><strong id="statPending">0</strong><small>Awaiting action</small></div>
         <div class="stat"><div class="stat-top">Menu Items <span class="stat-icon">🍴</span></div><strong id="statMenu">0</strong><small>Available menu cards</small></div>
@@ -74,10 +74,10 @@
           <div class="field"><label for="restaurantHours">Opening hours</label><input id="restaurantHours" placeholder="12 PM – 11 PM"></div>
           <div class="field"><label for="currency">Currency label</label><select id="currency"><option value="Rs.">Rs. (Pakistani Rupee)</option><option value="$">$ (US Dollar)</option><option value="£">£ (Pound)</option><option value="€">€ (Euro)</option></select></div>
           <div class="field full"><label for="restaurantLogo">Logo image URL (optional)</label><input id="restaurantLogo" type="url" placeholder="https://..."></div>
-          <div class="field full"><button class="btn" type="submit">Save Settings</button><p class="small-note">These settings are saved locally in this browser. To publish them on the customer website, connect both pages to the same backend.</p></div>
+          <div class="field full"><button class="btn" type="submit">Save Settings</button><p class="small-note">These settings are saved to the shared Supabase database and appear on the customer website.</p></div>
         </form>
       </div>
-      <div class="panel"><div class="panel-head"><h2>Data Tools</h2></div><p class="small-note">Export your local menu and demo orders as a JSON backup. This is not a server backup and does not include data from other devices.</p><div class="toolbar" style="margin-top:14px"><button class="btn secondary" id="exportData">Export backup (JSON)</button><button class="btn danger" id="clearOrders">Delete all local orders</button></div></div>
+      <div class="panel"><div class="panel-head"><h2>Data Tools</h2></div><p class="small-note">Export the menu, settings, and orders currently loaded from the shared database as a JSON backup.</p><div class="toolbar" style="margin-top:14px"><button class="btn secondary" id="exportData">Export backup (JSON)</button><button class="btn danger" id="clearOrders">Orders retained online</button></div></div>
     </section>
   </div>
 </main>
