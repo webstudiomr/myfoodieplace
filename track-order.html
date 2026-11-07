@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#df1026">
+<title>Track Your Order | Foodie Place</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body.track-page{margin:0;background:#fff8f8;color:#201f25;font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;min-height:100vh}
+.track-header{background:#fff;border-bottom:1px solid #eee8e9;padding:18px 22px}.track-header-inner{max-width:1050px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}.track-logo{font-size:20px;font-weight:900;color:#df1026;text-decoration:none}.track-home{color:#df1026;font-weight:750;text-decoration:none;font-size:14px}
+.track-wrap{width:min(760px,calc(100% - 32px));margin:55px auto}.track-card{background:#fff;border:1px solid #f0e5e7;border-radius:22px;padding:clamp(22px,5vw,42px);box-shadow:0 15px 45px #3d10100d}.track-eyebrow{color:#df1026;font-size:12px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase}.track-card h1{font-size:clamp(29px,5vw,40px);margin:10px 0}.track-intro{color:#777681;line-height:1.65;margin:0 0 25px}.track-form{display:flex;gap:10px;flex-wrap:wrap}.track-form input{flex:1;min-width:220px;border:1px solid #e8dfe1;border-radius:12px;padding:14px;font:inherit;outline:none}.track-form input:focus{border-color:#df1026}.track-form button{border:0;border-radius:12px;background:#df1026;color:white;padding:14px 22px;font-weight:850;cursor:pointer}.track-note{font-size:12px;color:#85818a;margin:12px 0 0}.track-message{margin-top:20px;color:#777681}.track-orders{display:grid;gap:14px;margin-top:22px}.track-order{border:1px solid #eee8e9;border-radius:16px;padding:18px}.track-order-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.track-order h2{font-size:15px;margin:0}.track-status{display:inline-block;border-radius:30px;padding:7px 12px;background:#fff0d8;color:#8a5700;font-size:12px;font-weight:900}.track-status.preparing{background:#eaf2ff;color:#2456a5}.track-status.ready{background:#e8f8ee;color:#176b3a}.track-status.delivered{background:#e8f8ee;color:#176b3a}.track-status.cancelled{background:#ffebed;color:#b90019}.track-meta{font-size:12px;color:#777681;margin-top:10px;line-height:1.7}.track-progress{display:flex;gap:5px;margin-top:16px}.track-progress span{height:6px;flex:1;border-radius:9px;background:#eee8e9}.track-progress span.done{background:#df1026}.track-footer{text-align:center;color:#85818a;font-size:12px;margin-top:18px}
+@media(max-width:560px){.track-wrap{margin:28px auto}.track-form{display:grid}.track-form input,.track-form button{width:100%}}
+</style>
+</head>
+<body class="track-page">
+<header class="track-header"><div class="track-header-inner"><a class="track-logo" href="index.html">♨ Foodie Place</a><a class="track-home" href="index.html">← Back to menu</a></div></header>
+<main class="track-wrap"><section class="track-card">
+<div class="track-eyebrow">Order updates</div><h1>Track your order</h1>
+<p class="track-intro">Enter the same phone number you used at checkout. We’ll show your recent orders and keep their status updated automatically.</p>
+<form class="track-form" id="trackForm"><input id="phone" type="tel" maxlength="30" autocomplete="tel" placeholder="Phone number used for your order" required><button id="trackButton" type="submit">Show my orders</button></form>
+<p class="track-note">Use the same phone number format you entered when placing your order.</p>
+<div id="trackMessage" class="track-message" role="status" aria-live="polite"></div><div id="trackOrders" class="track-orders"></div>
+<div class="track-footer" id="lastUpdated"></div>
+</section></main>
+<script>
+(function(){
+ const form=document.getElementById("trackForm"),phoneInput=document.getElementById("phone"),message=document.getElementById("trackMessage"),list=document.getElementById("trackOrders"),button=document.getElementById("trackButton"),updated=document.getElementById("lastUpdated");
+ let refreshTimer=null,activePhone="";
+ const safe=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const money=value=>"Rs. "+Number(value||0).toLocaleString("en-PK");
+ function progress(status){if(status==="Cancelled")return -1;return ({Pending:0,Preparing:1,Ready:2,Delivered:3})[status]??0}
+ function render(orders){
+  if(!orders.length){list.innerHTML="";message.textContent="No orders were found for this phone number. Check the number and try again.";updated.textContent="";return}
+  message.textContent=orders.length===1?"Your order status is shown below.":"Your recent orders are shown below.";
+  list.innerHTML=orders.map(o=>{const p=progress(o.status),steps=["Pending","Preparing","Ready","Delivered"];return '<article class="track-order"><div class="track-order-top"><h2>Order '+safe(o.id)+'</h2><span class="track-status '+safe(String(o.status).toLowerCase())+'">'+safe(o.status)+'</span></div><div class="track-meta">Placed: '+safe(o.date?new Date(o.date).toLocaleString():"—")+'<br>Total: '+safe(money(o.total))+'</div>'+(p<0?'<p class="track-meta">This order was cancelled.</p>':'<div class="track-progress" aria-label="Order progress">'+steps.map((s,i)=>'<span class="'+(i<=p?"done":"")+'"></span>').join("")+'</div>')+'</article>'}).join("");
+  updated.textContent="Automatically refreshes every 15 seconds · Last checked: "+new Date().toLocaleTimeString();
+ }
+ async function load(showLoading=false){
+  if(!activePhone)return;
+  if(showLoading){button.disabled=true;button.textContent="Checking…";message.textContent="Looking up your orders…"}
+  try{const response=await fetch("/api/track-order?phone="+encodeURIComponent(activePhone),{cache:"no-store"});const data=await response.json();if(!response.ok)throw new Error(data.error||"Could not load order status.");render(data.orders||[])}
+  catch(error){message.textContent=error.message||"Could not load order status. Please try again."}
+  finally{if(showLoading){button.disabled=false;button.textContent="Show my orders"}}
+ }
+ form.addEventListener("submit",event=>{event.preventDefault();activePhone=phoneInput.value.trim();if(!activePhone)return;clearInterval(refreshTimer);list.innerHTML="";load(true);refreshTimer=setInterval(()=>load(false),15000)});
+})();
+</script>
+</body>
+</html>
