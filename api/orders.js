@@ -1,4 +1,4 @@
-import { db, fail, requireAdmin, requireMethod, send } from "./_lib/db.js";
+import { db, fail, requireAdmin, requireMethod, send } from "../lib/db.js";
 
 const statuses = new Set(["Pending","Preparing","Ready","Delivered","Cancelled"]);
 
