@@ -39,7 +39,7 @@
         <div class="stat"><div class="stat-top">Menu Items <span class="stat-icon">🍴</span></div><strong id="statMenu">0</strong><small>Available menu cards</small></div>
       </div>
       <div class="panel"><div class="panel-head"><h2>Recent Orders</h2><button class="btn secondary small" data-go="orders">View all orders →</button></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody id="recentOrders"></tbody></table></div><div class="empty" id="recentEmpty">No orders yet. New orders will appear here once the ordering system is connected.</div></div>
-      <div class="panel"><div class="panel-head"><h2>Quick Actions</h2></div><div class="toolbar"><button class="btn" data-action="add-dish">＋ Add a Dish</button><button class="btn secondary" data-go="orders">Manage Orders</button><button class="btn secondary" data-go="settings">Edit Restaurant Details</button></div><p class="small-note">Tip: You can add sample orders from the Orders page to test the dashboard interface.</p></div>
+      <div class="panel"><div class="panel-head"><h2>Quick Actions</h2></div><div class="toolbar"><button class="btn" data-action="add-dish">＋ Add a Dish</button><button class="btn secondary" data-go="orders">Manage Orders</button><button class="btn secondary" data-go="settings">Edit Restaurant Details</button></div></div>
     </section>
 
     <section class="view" id="view-menu">
@@ -55,7 +55,7 @@
     </section>
 
     <section class="view" id="view-orders">
-      <div class="page-head"><div><h1>Customer Orders</h1><p>Review order details and update preparation status.</p></div><button class="btn secondary" id="sampleOrder">＋ Add Test Order</button></div>
+      <div class="page-head"><div><h1>Customer Orders</h1><p>Review order details and update preparation status.</p></div></div>
       <div class="panel"><div class="panel-head"><h2>WhatsApp OTP Requests</h2><button class="btn secondary small" id="refreshOtpRequests" type="button">Refresh requests</button></div><p class="small-note">Generate a one-time code, then send it to the customer's WhatsApp number. Codes expire after 5 minutes.</p><div class="table-wrap"><table><thead><tr><th>Customer number</th><th>Requested</th><th>Action</th></tr></thead><tbody id="otpRequestRows"></tbody></table></div><div class="empty" id="otpRequestsEmpty">No pending verification requests.</div><div id="otpGeneratedResult" class="notice" style="display:none;margin-top:14px"></div></div>
       <div class="panel"><div class="toolbar"><input class="search" id="orderSearch" placeholder="Search order or customer..."><select class="search" id="orderStatusFilter" aria-label="Filter order status"><option value="All">All statuses</option><option>Pending</option><option>Preparing</option><option>Ready</option><option>Delivered</option><option>Cancelled</option></select></div>
       <div class="table-wrap"><table><thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Placed</th><th>Status</th><th>Actions</th></tr></thead><tbody id="orderRows"></tbody></table></div><div class="empty" id="ordersEmpty">No orders found. Real customer orders require a shared backend connected to your customer website.</div></div>
