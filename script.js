@@ -15,7 +15,7 @@ const defaultMenu=[
 ];
 const defaultSettings={name:"Foodie Place",tagline:"Restaurant & Cafe",phone:"",whatsapp_phone:"",email:"hello@yourrestaurant.com",address:"Lahore, Pakistan",hours:"12 PM – 11 PM",currency:"Rs.",logo:"",delivery_fee:0,minimum_order:0,estimated_delivery:"30–45 minutes",is_open:true};
 function readStore(key,fallback){try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):structuredClone(fallback)}catch(e){return structuredClone(fallback)}}
-let menu=readStore(MENU_KEY,[]),settings=readStore(SETTINGS_KEY,defaultSettings),cart=readStore("foodie_cart_v1",{});let activeCategory="All",toastTimer;
+let menu=[],settings=readStore(SETTINGS_KEY,defaultSettings),cart=readStore("foodie_cart_v1",{});let activeCategory="All",toastTimer;
 const $=id=>document.getElementById(id);
 
 function safe(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -56,7 +56,7 @@ const sampleMenu=[
 ];
 const defaultSettings={name:"Foodie Place",tagline:"Restaurant & Cafe",phone:"+92 300 1234567",email:"hello@yourrestaurant.com",address:"Lahore, Pakistan",hours:"12 PM – 11 PM",currency:"Rs.",logo:""};
 function load(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):structuredClone(fallback)}catch(e){return structuredClone(fallback)}}
-let menu=load(KEY_MENU,[]),orders=load(KEY_ORDERS,[]),settings=load(KEY_SETTINGS,defaultSettings),imageLibrary=[];
+let menu=[],orders=load(KEY_ORDERS,[]),settings=load(KEY_SETTINGS,defaultSettings),imageLibrary=[];
 let toastTimer;
 const $=id=>document.getElementById(id);
 let adminAuthenticated = sessionStorage.getItem("foodie_admin_authenticated") === "1";
