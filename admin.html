@@ -25,7 +25,7 @@
 <main class="main">
   <header class="topbar">
     <div class="top-left"><button class="mobile-menu" id="mobileMenu" aria-label="Open navigation">☰</button><div><div class="top-title" id="topTitle">Dashboard</div><div class="top-sub">Manage your restaurant in one place</div></div></div>
-    <div class="top-actions"><span class="pill">● Admin workspace</span><div class="avatar">A</div></div>
+    <div class="top-actions"><span class="pill">● Admin workspace</span><button class="btn secondary small" id="adminSignOut" type="button">Sign out</button><div class="avatar">A</div></div>
   </header>
   <div class="content">
     <div class="notice"><strong>Shared database connected</strong>Menu items, restaurant settings, and customer orders are stored online in Supabase. Admin changes require your private FOODIE_ADMIN_KEY, entered when prompted. Keep that key private and do not share it.</div>
@@ -39,12 +39,12 @@
         <div class="stat"><div class="stat-top">Menu Items <span class="stat-icon">🍴</span></div><strong id="statMenu">0</strong><small>Available menu cards</small></div>
       </div>
       <div class="panel"><div class="panel-head"><h2>Recent Orders</h2><button class="btn secondary small" data-go="orders">View all orders →</button></div><div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody id="recentOrders"></tbody></table></div><div class="empty" id="recentEmpty">No orders yet. New orders will appear here once the ordering system is connected.</div></div>
-      <div class="panel"><div class="panel-head"><h2>Quick Actions</h2></div><div class="toolbar"><button class="btn" data-action="add-dish">＋ Add a Dish</button><button class="btn secondary" data-go="orders">Manage Orders</button><button class="btn secondary" data-go="settings">Edit Restaurant Details</button></div><p class="small-note">Tip: You can add sample orders from the Orders page to test the dashboard interface.</p></div>
+      <div class="panel"><div class="panel-head"><h2>Quick Actions</h2></div><div class="toolbar"><button class="btn" data-action="add-dish">＋ Add a Dish</button><button class="btn secondary" data-go="orders">Manage Orders</button><button class="btn secondary" data-go="settings">Edit Restaurant Details</button></div></div>
     </section>
 
     <section class="view" id="view-menu">
       <div class="page-head"><div><h1>Menu Management</h1><p>Add, edit, price, and organize your menu cards.</p></div><button class="btn" data-action="add-dish">＋ Add New Dish</button></div>
-      <div class="panel"><div class="toolbar"><input class="search" id="menuSearch" placeholder="Search dishes..."><select class="search" id="menuCategory" aria-label="Filter category"><option value="All">All categories</option><option>Pizza</option><option>Burger</option><option>Pasta</option><option>Salad</option><option>Dessert</option><option>Drink</option></select><button class="btn secondary" id="resetMenu">Restore sample menu</button></div>
+      <div class="panel"><div class="toolbar"><input class="search" id="menuSearch" placeholder="Search dishes..."><select class="search" id="menuCategory" aria-label="Filter category"><option value="All">All categories</option><option>Pizza</option><option>Burger</option><option>Pasta</option><option>Salad</option><option>Dessert</option><option>Drink</option></select></div>
       <div class="table-wrap"><table><thead><tr><th>Dish</th><th>Category</th><th>Price</th><th>Availability</th><th>Actions</th></tr></thead><tbody id="menuRows"></tbody></table></div><div class="empty" id="menuEmpty">No menu items match your search.</div></div>
     </section>
 
@@ -55,7 +55,7 @@
     </section>
 
     <section class="view" id="view-orders">
-      <div class="page-head"><div><h1>Customer Orders</h1><p>Review order details and update preparation status.</p></div><button class="btn secondary" id="sampleOrder">＋ Add Test Order</button></div>
+      <div class="page-head"><div><h1>Customer Orders</h1><p>Review order details and update preparation status.</p></div></div>
       <div class="panel"><div class="panel-head"><h2>WhatsApp OTP Requests</h2><button class="btn secondary small" id="refreshOtpRequests" type="button">Refresh requests</button></div><p class="small-note">Generate a one-time code, then send it to the customer's WhatsApp number. Codes expire after 5 minutes.</p><div class="table-wrap"><table><thead><tr><th>Customer number</th><th>Requested</th><th>Action</th></tr></thead><tbody id="otpRequestRows"></tbody></table></div><div class="empty" id="otpRequestsEmpty">No pending verification requests.</div><div id="otpGeneratedResult" class="notice" style="display:none;margin-top:14px"></div></div>
       <div class="panel"><div class="toolbar"><input class="search" id="orderSearch" placeholder="Search order or customer..."><select class="search" id="orderStatusFilter" aria-label="Filter order status"><option value="All">All statuses</option><option>Pending</option><option>Preparing</option><option>Ready</option><option>Delivered</option><option>Cancelled</option></select></div>
       <div class="table-wrap"><table><thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Placed</th><th>Status</th><th>Actions</th></tr></thead><tbody id="orderRows"></tbody></table></div><div class="empty" id="ordersEmpty">No orders found. Real customer orders require a shared backend connected to your customer website.</div></div>
@@ -63,9 +63,8 @@
 
     <section class="view" id="view-images">
       <div class="page-head"><div><h1>Image Library</h1><p>Keep food photos here, then reuse them on menu cards.</p></div><label class="btn upload-label" for="libraryUpload">＋ Add Images<input id="libraryUpload" type="file" accept="image/*" multiple hidden></label></div>
-      <div class="notice"><strong>Vercel Blob cloud image library</strong>Images uploaded here are stored online and can be reused from other devices. Connect with the private image-library key configured in Vercel. Existing browser-only images can be migrated when you connect.
-        <div class="image-cloud-controls"><label class="sr-only" for="blobAdminKey">Cloud image-library key</label><input id="blobAdminKey" type="password" autocomplete="current-password" placeholder="Enter cloud image-library key" aria-label="Cloud image-library key"><button class="btn secondary" id="connectImageStorage" type="button">Connect storage</button><button class="btn secondary small" id="disconnectImageStorage" type="button">Disconnect</button></div>
-        <p class="small-note" id="imageStorageStatus" aria-live="polite">Cloud storage is not connected in this browser session.</p>
+      <div class="notice"><strong>Vercel Blob cloud image library</strong>Images uploaded here are stored online and can be reused from other devices. Uploads use your secure admin session; no separate image key is needed. Existing browser-only images can be migrated when you connect.
+        <p class="small-note" id="imageStorageStatus" aria-live="polite">Sign in to the admin dashboard to upload and manage cloud images.</p>
       </div>
       <div class="panel"><div class="panel-head"><h2>Saved Images</h2><span class="small-note" id="imageCount">0 images</span></div><div class="image-library-grid" id="imageLibraryGrid"></div><div class="empty" id="imageLibraryEmpty">No images yet. Use “Add Images” to upload food photos.</div></div>
     </section>
