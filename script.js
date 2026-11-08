@@ -15,7 +15,7 @@ const defaultMenu=[
 ];
 const defaultSettings={name:"Foodie Place",tagline:"Restaurant & Cafe",phone:"",whatsapp_phone:"",email:"hello@yourrestaurant.com",address:"Lahore, Pakistan",hours:"12 PM – 11 PM",currency:"Rs.",logo:"",delivery_fee:0,minimum_order:0,estimated_delivery:"30–45 minutes",is_open:true};
 function readStore(key,fallback){try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):structuredClone(fallback)}catch(e){return structuredClone(fallback)}}
-let menu=readStore(MENU_KEY,defaultMenu),settings=readStore(SETTINGS_KEY,defaultSettings),cart=readStore("foodie_cart_v1",{});let activeCategory="All",toastTimer;
+let menu=readStore(MENU_KEY,[]),settings=readStore(SETTINGS_KEY,defaultSettings),cart=readStore("foodie_cart_v1",{});let activeCategory="All",toastTimer;
 const $=id=>document.getElementById(id);
 
 function safe(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -56,7 +56,7 @@ const sampleMenu=[
 ];
 const defaultSettings={name:"Foodie Place",tagline:"Restaurant & Cafe",phone:"+92 300 1234567",email:"hello@yourrestaurant.com",address:"Lahore, Pakistan",hours:"12 PM – 11 PM",currency:"Rs.",logo:""};
 function load(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):structuredClone(fallback)}catch(e){return structuredClone(fallback)}}
-let menu=load(KEY_MENU,sampleMenu),orders=load(KEY_ORDERS,[]),settings=load(KEY_SETTINGS,defaultSettings),imageLibrary=[];
+let menu=load(KEY_MENU,[]),orders=load(KEY_ORDERS,[]),settings=load(KEY_SETTINGS,defaultSettings),imageLibrary=[];
 let toastTimer;
 const $=id=>document.getElementById(id);
 let adminAuthenticated = sessionStorage.getItem("foodie_admin_authenticated") === "1";
@@ -119,7 +119,7 @@ $("clearDishImage").addEventListener("click",()=>{$("dishImage").value="";$("dis
 $("uploadFromPicker").addEventListener("click",()=>{$("dishImageFile").click();closeModal("imagePickerModal")});
 document.addEventListener("click",async e=>{const use=e.target.closest("[data-use-library]"),pick=e.target.closest("[data-pick-image]"),del=e.target.closest("[data-delete-image]");if(use){const img=imageLibrary.find(x=>x.id===use.dataset.useLibrary);if(img){go("menu");openDish();$("dishImage").value=imageSrc(img);updateDishImagePreview(imageSrc(img));notify("Image selected. Add the dish details, then save.")}}if(pick){const img=imageLibrary.find(x=>x.id===pick.dataset.pickImage);if(img){$("dishImage").value=imageSrc(img);updateDishImagePreview(imageSrc(img));closeModal("imagePickerModal");notify("Image selected")}}if(del){const img=imageLibrary.find(x=>x.id===del.dataset.deleteImage);if(img&&confirm(`Delete image "${img.name}" from cloud storage? Existing menu items using it will no longer display it.`)){try{await cloudRequest("DELETE",{id:img.id});await refreshCloudImages();notify("Image deleted from cloud storage")}catch(err){notify(err.message||"Could not delete image.")}}}});
 if($("imageStorageStatus"))cloudStatus("Cloud image storage is ready. Sign in to upload and manage images.");
-$("resetMenu").addEventListener("click",()=>{if(!confirm("Restore the original sample menu? This replaces your local menu edits."))return;menu=structuredClone(sampleMenu);saveAll();renderMenu();notify("Sample menu restored")});
+
 async function refreshOtpRequests(){try{const data=await adminRequest("/api/track-otp");const rows=data.requests||[];$("otpRequestRows").innerHTML=rows.map(r=>'<tr><td><strong>'+escapeHTML(r.phone)+'</strong></td><td>'+escapeHTML(new Date(r.created_at).toLocaleString())+'</td><td><button class="btn small" data-otp-generate="'+escapeHTML(r.id)+'">Generate & prepare WhatsApp</button></td></tr>').join("");$("otpRequestsEmpty").style.display=rows.length?"none":"block"}catch(err){notify("Could not load OTP requests: "+err.message)}}
 $("refreshOtpRequests").addEventListener("click",refreshOtpRequests);
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-otp-generate]");if(!b)return;b.disabled=true;b.textContent="Generating…";try{const result=await adminRequest("/api/track-otp",{method:"POST",body:{action:"generate",id:b.dataset.otpGenerate}});const waNumber=String(result.phone||"").replace(/\D/g,"").replace(/^0/,"92");const message="Assalam-o-Alaikum! Your Foodie Place order tracking verification code is "+result.code+". It expires in 5 minutes. Please do not share this code with anyone.";const link="https://wa.me/"+waNumber+"?text="+encodeURIComponent(message);$("otpGeneratedResult").style.display="block";$("otpGeneratedResult").innerHTML='<strong>Verification code: '+escapeHTML(result.code)+'</strong><p class="small-note">Send this code only to '+escapeHTML(result.phone)+'. It expires in 5 minutes.</p><a class="btn small" href="'+escapeHTML(link)+'" target="_blank" rel="noopener">Open customer WhatsApp chat</a>';notify("OTP generated. Send it to the customer on WhatsApp.");await refreshOtpRequests()}catch(err){notify(err.message||"Could not generate OTP.");b.disabled=false;b.textContent="Generate & prepare WhatsApp"}});
