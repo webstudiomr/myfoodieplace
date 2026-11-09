@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   try {
     res.setHeader("Cache-Control", "no-store, max-age=0");
     if (req.method === "GET") {
-      if (!requireAdmin(req, res)) return;
+      if (!(await requireAdmin(req, res))) return;
       const rows = await db("order_tracking_otps", "select=id,phone,status,created_at,expires_at&status=eq.requested&order=created_at.asc&limit=50");
       return send(res, 200, { requests: rows || [] });
     }
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       return send(res, 200, { session: sessionFor(phone), message: "Phone number verified." });
     }
     if (body.action === "generate") {
-      if (!requireAdmin(req, res)) return;
+      if (!(await requireAdmin(req, res))) return;
       const id = String(body.id || "");
       const rows = await db("order_tracking_otps", "select=id,phone,status,created_at&id=eq." + encodeURIComponent(id) + "&limit=1");
       const row = rows?.[0];

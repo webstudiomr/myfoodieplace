@@ -7,7 +7,7 @@ export default async function handler(req, res) {
       return send(res, 200, { items: rows });
     }
     if (!requireMethod(req, res, ["POST","DELETE"])) return;
-    if (!requireAdmin(req, res)) return;
+    if (!(await requireAdmin(req, res))) return;
     if (req.method === "POST") {
       const item = req.body || {};
       if (!item.id || !String(item.name || "").trim() || !String(item.category || "").trim() || !Number.isFinite(Number(item.price)) || Number(item.price) < 0) {

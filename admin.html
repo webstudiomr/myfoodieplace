@@ -28,7 +28,7 @@
     <div class="top-actions"><span class="pill">● Admin workspace</span><button class="btn secondary small" id="adminSignOut" type="button">Sign out</button><div class="avatar">A</div></div>
   </header>
   <div class="content">
-    <div class="notice"><strong>Shared database connected</strong>Menu items, restaurant settings, and customer orders are stored online in Supabase. Admin changes require your private FOODIE_ADMIN_KEY, entered when prompted. Keep that key private and do not share it.</div>
+    <div class="notice"><strong>Shared database connected</strong>Menu items, restaurant settings, and customer orders are stored online in Supabase. Administrator access is protected by Supabase Auth. Sign in with your assigned email and use the security panel to change your password.</div>
 
     <section class="view active" id="view-dashboard">
       <div class="page-head"><div><h1>Welcome back 👋</h1><p>Here's what's happening at your restaurant.</p></div><button class="btn" data-go="menu">＋ Manage Menu</button></div>
@@ -81,6 +81,24 @@
           <div class="field full"><button class="btn" type="submit">Save Contact Details</button><p class="small-note">Only phone, WhatsApp, email, address and opening hours can be changed here. Restaurant name, logo, currency and ordering settings are protected.</p></div>
         </form>
       </div>
+      <div class="panel" id="developerToolsPanel" hidden>
+        <div class="panel-head"><h2>MR WebStudio · Customer Access Transfer</h2></div>
+        <p class="small-note">Developer-only control. Create or replace the restaurant owner's login. The previous restaurant owner's access is revoked; restaurant data remains untouched.</p>
+        <form id="customerAccessForm" class="form-grid">
+          <div class="field"><label for="customerAdminEmail">New customer email</label><input id="customerAdminEmail" type="email" autocomplete="off" required placeholder="customer@example.com"></div>
+          <div class="field"><label for="customerTempPassword">Temporary password (12+ characters)</label><input id="customerTempPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></div>
+          <div class="field full"><button class="btn" type="submit">Transfer administrator access</button><p class="small-note" id="customerAccessStatus" aria-live="polite"></p></div>
+        </form>
+        <div id="customerAccessResult" hidden class="notice" style="margin-top:12px"></div>
+      </div>
+      <div class="panel"><div class="panel-head"><h2>Administrator Security</h2></div>
+        <p class="small-note">Change the password for your signed-in administrator account. Use “Forgot your password?” on the sign-in page if you cannot access your account.</p>
+        <form id="adminPasswordForm" class="form-grid">
+          <div class="field"><label for="adminNewPassword">New password</label><input id="adminNewPassword" type="password" minlength="12" autocomplete="new-password" required></div>
+          <div class="field"><label for="adminConfirmPassword">Confirm new password</label><input id="adminConfirmPassword" type="password" minlength="12" autocomplete="new-password" required></div>
+          <div class="field full"><button class="btn" type="submit">Update administrator password</button><p class="small-note" id="adminPasswordStatus" aria-live="polite"></p></div>
+        </form>
+      </div>
       <div class="panel"><div class="panel-head"><h2>Data Tools</h2></div><p class="small-note">Export the menu, settings, and orders currently loaded from the shared database as a JSON backup.</p><div class="toolbar" style="margin-top:14px"><button class="btn secondary" id="exportData">Export backup (JSON)</button><button class="btn danger" id="clearOrders">Orders retained online</button></div></div>
     </section>
   </div>
@@ -118,6 +136,9 @@
   <div class="modal"><div class="modal-head"><h2 id="imagePickerTitle">Choose an Image</h2><button class="close" data-close="imagePickerModal" aria-label="Close">×</button></div><p class="small-note">Select an image to use for this menu item.</p><div class="image-library-grid picker-grid" id="imagePickerGrid"></div><div class="empty" id="imagePickerEmpty">Your Image Library is empty. Add images first.</div><div class="modal-actions"><button type="button" class="btn secondary" data-close="imagePickerModal">Cancel</button><button type="button" class="btn" id="uploadFromPicker">＋ Upload an image</button></div></div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<style>.admin-page .app{display:none}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth-client.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

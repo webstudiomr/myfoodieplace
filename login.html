@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#c90019"><title>Foodie Place — Administrator Login</title><link rel="stylesheet" href="style.css">
+<style>
+.auth-shell{min-height:100vh;display:grid;place-items:center;padding:24px;background:#f7f7f8}.auth-card{width:min(100%,440px);background:#fff;border:1px solid #e8e8eb;border-radius:18px;padding:30px;box-shadow:0 16px 50px #1111}.auth-card h1{margin:0 0 8px;font-size:26px}.auth-card p{color:#666;line-height:1.5}.auth-card .field{margin:16px 0}.auth-card input{width:100%;box-sizing:border-box}.auth-card button.btn{width:100%;margin-top:8px}.auth-link{border:0;background:none;color:#c90019;text-decoration:underline;cursor:pointer;padding:12px 0}.auth-status{min-height:24px;font-size:14px;color:#a10c1d}.auth-hidden{display:none!important}
+</style></head>
+<body class="admin-page"><main class="auth-shell"><section class="auth-card">
+<div class="brand" style="margin-bottom:22px"><div class="brand-mark">♨</div><div><strong>Foodie Place</strong><small>ADMINISTRATOR ACCESS</small></div></div>
+<section id="loginPanel"><h1>Administrator sign in</h1><p>Use the private administrator credentials provided by your website developer. Accounts cannot be created from this page.</p>
+<form id="loginForm"><div class="field"><label for="loginEmail">Email address</label><input id="loginEmail" type="email" autocomplete="username" required></div><div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div><button class="btn" type="submit">Sign in securely</button></form>
+<button class="auth-link" id="showForgot" type="button">Forgot your password?</button></section>
+<section id="forgotPanel" class="auth-hidden"><h1>Reset your password</h1><p>We'll send a recovery link to the administrator email address.</p>
+<form id="forgotForm"><div class="field"><label for="forgotEmail">Administrator email</label><input id="forgotEmail" type="email" autocomplete="email" required></div><button class="btn" type="submit">Send recovery link</button></form><button class="auth-link" id="backForgot" type="button">Back to sign in</button></section>
+<section id="resetPanel" class="auth-hidden"><h1>Choose a new password</h1><p>Use at least 12 characters.</p>
+<form id="resetForm"><div class="field"><label for="resetPassword">New password</label><input id="resetPassword" type="password" minlength="12" autocomplete="new-password" required></div><div class="field"><label for="resetConfirm">Confirm new password</label><input id="resetConfirm" type="password" minlength="12" autocomplete="new-password" required></div><button class="btn" type="submit">Save new password</button></form></section>
+<p id="authStatus" class="auth-status" role="status" aria-live="polite"></p>
+</section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="auth-client.js"></script>
+<script>
+(async function(){
+ const $=id=>document.getElementById(id),status=$("authStatus"),show=id=>["loginPanel","forgotPanel","resetPanel"].forEach(x=>$(x).classList.toggle("auth-hidden",x!==id));
+ if(!(await window.foodieAdminAuth.ready)){status.textContent=status.textContent||"Authentication could not be initialized.";return}
+ const client=window.foodieAdminAuth.client;if(!client){status.textContent="Authentication is unavailable.";return}
+ async function enterAdmin(){
+  const {data:{session}}=await client.auth.getSession();if(!session)throw new Error("Please sign in again.");
+  const response=await fetch("/api/admin-bootstrap",{method:"POST",headers:{Authorization:"Bearer "+session.access_token}});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"This email is not authorised for this restaurant.");
+  const check=await fetch("/api/admin-session",{headers:{Authorization:"Bearer "+session.access_token}});
+  if(!check.ok)throw new Error("Administrator access could not be verified.");
+  location.replace("/admin.html");
+ }
+ const recovery=location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("mode")==="recovery";
+ if(recovery){const {data:{session}}=await client.auth.getSession();if(session)show("resetPanel");else status.textContent="This recovery link is invalid or expired. Request a new one."}
+ $("showForgot").addEventListener("click",()=>{ $("forgotEmail").value=$("loginEmail").value;show("forgotPanel");status.textContent="";});
+ $("backForgot").addEventListener("click",()=>{show("loginPanel");status.textContent="";});
+ $("loginForm").addEventListener("submit",async e=>{e.preventDefault();status.textContent="Signing in…";const {error}=await client.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){status.textContent=error.message;return}try{await enterAdmin()}catch(err){await client.auth.signOut();status.textContent=err.message}});
+ $("forgotForm").addEventListener("submit",async e=>{e.preventDefault();status.textContent="Sending recovery request…";const {error}=await client.auth.resetPasswordForEmail($("forgotEmail").value.trim());status.textContent=error?error.message:"If this address belongs to an administrator, a recovery email will be sent. Check your inbox and spam folder."});
+ $("resetForm").addEventListener("submit",async e=>{e.preventDefault();const password=$("resetPassword").value;if(password.length<12||password!==$("resetConfirm").value){status.textContent="Passwords must match and contain at least 12 characters.";return}status.textContent="Updating password…";const {error}=await client.auth.updateUser({password});if(error){status.textContent=error.message;return}await client.auth.signOut();show("loginPanel");status.textContent="Password updated. You can now sign in with your new password."});
+ client.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"&&session)show("resetPanel")});
+})();
+</script></body></html>
