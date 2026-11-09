@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       return send(res, 200, {settings:rows[0] || defaults});
     }
     if (!requireMethod(req, res, ["POST"])) return;
-    if (!requireAdmin(req, res)) return;
+    if (!(await requireAdmin(req, res))) return;
     const value = req.body || {};
     const existingRows = await db("restaurant_settings", "select=*&id=eq.1&limit=1");
     const existing = existingRows?.[0] || defaults;
