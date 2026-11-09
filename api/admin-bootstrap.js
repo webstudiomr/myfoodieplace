@@ -5,10 +5,12 @@ export default async function handler(req,res){
     const user=await verifyAccessToken(req);
     if(!user?.id||!user?.email||!user.email_confirmed_at)return send(res,401,{error:"Sign in with a verified email address first."});
     const email=user.email.toLowerCase();
+    const metadata=user.app_metadata||{};
+    const tenantId=process.env.FOODIE_TENANT_ID;
     const ownerEmail=String(process.env.FOODIE_ADMIN_EMAIL||"").trim().toLowerCase();
     const developers=String(process.env.FOODIE_DEVELOPER_EMAILS||"").split(",").map(v=>v.trim().toLowerCase()).filter(Boolean);
-    const role=email===ownerEmail&&ownerEmail?"restaurant_owner":developers.includes(email)?"developer":null;
-    const tenantId=process.env.FOODIE_TENANT_ID;
+    const isExistingOwner=!!tenantId&&metadata.tenant_id===tenantId&&metadata.role==="restaurant_owner"&&metadata.disabled!==true;
+    const role=email===ownerEmail&&ownerEmail?"restaurant_owner":developers.includes(email)?"developer":isExistingOwner?"restaurant_owner":null;
     const base=process.env.SUPABASE_URL;
     const serviceKey=process.env.SUPABASE_SERVICE_ROLE_KEY;
     if(!role)return send(res,403,{error:"This email address has not been assigned an administrator role for this restaurant."});
@@ -16,9 +18,9 @@ export default async function handler(req,res){
     const response=await fetch(base.replace(/\/$/,"")+"/auth/v1/admin/users/"+encodeURIComponent(user.id),{
       method:"PUT",
       headers:{apikey:serviceKey,Authorization:"Bearer "+serviceKey,"Content-Type":"application/json"},
-      body:JSON.stringify({app_metadata:{...(user.app_metadata||{}),role,tenant_id:tenantId,disabled:false}})
+      body:JSON.stringify({app_metadata:{...metadata,role,tenant_id:tenantId,disabled:false}})
     });
     if(!response.ok){console.error("Supabase admin provisioning failed:",response.status);return send(res,502,{error:"Could not assign administrator permissions."});}
-    return send(res,200,{ok:true,role,email});
+    return send(res,200,{ok:true,role,email,mustChangePassword:metadata.must_change_password===true});
   }catch(error){console.error("Admin bootstrap failed:",error?.message||"unknown error");return send(res,500,{error:"Administrator setup failed."});}
 }
