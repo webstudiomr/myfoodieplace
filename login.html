@@ -5,11 +5,9 @@
 </style></head>
 <body class="admin-page"><main class="auth-shell"><section class="auth-card">
 <div class="brand" style="margin-bottom:22px"><div class="brand-mark">♨</div><div><strong>Foodie Place</strong><small>ADMINISTRATOR ACCESS</small></div></div>
-<section id="loginPanel"><h1>Administrator sign in</h1><p>Sign in with the email address assigned to your restaurant.</p>
+<section id="loginPanel"><h1>Administrator sign in</h1><p>Use the private administrator credentials provided by your website developer. Accounts cannot be created from this page.</p>
 <form id="loginForm"><div class="field"><label for="loginEmail">Email address</label><input id="loginEmail" type="email" autocomplete="username" required></div><div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div><button class="btn" type="submit">Sign in securely</button></form>
-<button class="auth-link" id="showSignup" type="button">First time? Create your administrator account</button><br><button class="auth-link" id="showForgot" type="button">Forgot your password?</button></section>
-<section id="signupPanel" class="auth-hidden"><h1>Create administrator account</h1><p>Only the email address assigned by the website owner can receive administrator access. Verify your email before signing in.</p>
-<form id="signupForm"><div class="field"><label for="signupEmail">Assigned administrator email</label><input id="signupEmail" type="email" autocomplete="email" required></div><div class="field"><label for="signupPassword">Password (at least 12 characters)</label><input id="signupPassword" type="password" minlength="12" autocomplete="new-password" required></div><button class="btn" type="submit">Create account</button></form><button class="auth-link" id="backSignup" type="button">Back to sign in</button></section>
+<button class="auth-link" id="showForgot" type="button">Forgot your password?</button></section>
 <section id="forgotPanel" class="auth-hidden"><h1>Reset your password</h1><p>We'll send a recovery link to the administrator email address.</p>
 <form id="forgotForm"><div class="field"><label for="forgotEmail">Administrator email</label><input id="forgotEmail" type="email" autocomplete="email" required></div><button class="btn" type="submit">Send recovery link</button></form><button class="auth-link" id="backForgot" type="button">Back to sign in</button></section>
 <section id="resetPanel" class="auth-hidden"><h1>Choose a new password</h1><p>Use at least 12 characters.</p>
@@ -19,7 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="auth-client.js"></script>
 <script>
 (async function(){
- const $=id=>document.getElementById(id),status=$("authStatus"),show=id=>["loginPanel","signupPanel","forgotPanel","resetPanel"].forEach(x=>$(x).classList.toggle("auth-hidden",x!==id));
+ const $=id=>document.getElementById(id),status=$("authStatus"),show=id=>["loginPanel","forgotPanel","resetPanel"].forEach(x=>$(x).classList.toggle("auth-hidden",x!==id));
  if(!(await window.foodieAdminAuth.ready)){status.textContent=status.textContent||"Authentication could not be initialized.";return}
  const client=window.foodieAdminAuth.client;if(!client){status.textContent="Authentication is unavailable.";return}
  async function enterAdmin(){
@@ -33,12 +31,8 @@
  }
  const recovery=location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("mode")==="recovery";
  if(recovery){const {data:{session}}=await client.auth.getSession();if(session)show("resetPanel");else status.textContent="This recovery link is invalid or expired. Request a new one."}
- else if(location.hash.includes("type=signup"))status.textContent="Email verified. Sign in to finish administrator setup.";
- $("showSignup").addEventListener("click",()=>{ $("signupEmail").value=$("loginEmail").value;show("signupPanel");status.textContent="";});
  $("showForgot").addEventListener("click",()=>{ $("forgotEmail").value=$("loginEmail").value;show("forgotPanel");status.textContent="";});
- $("backSignup").addEventListener("click",()=>{show("loginPanel");status.textContent="";});
  $("backForgot").addEventListener("click",()=>{show("loginPanel");status.textContent="";});
- $("signupForm").addEventListener("submit",async e=>{e.preventDefault();status.textContent="Creating account…";const email=$("signupEmail").value.trim().toLowerCase(),password=$("signupPassword").value;const {data,error}=await client.auth.signUp({email,password});if(error){status.textContent=error.message;return}if(data.session){try{await enterAdmin()}catch(err){status.textContent=err.message}}else{show("loginPanel");$("loginEmail").value=email;status.textContent="Account created. Check your inbox to verify your email, then sign in here."}});
  $("loginForm").addEventListener("submit",async e=>{e.preventDefault();status.textContent="Signing in…";const {error}=await client.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){status.textContent=error.message;return}try{await enterAdmin()}catch(err){await client.auth.signOut();status.textContent=err.message}});
  $("forgotForm").addEventListener("submit",async e=>{e.preventDefault();status.textContent="Sending recovery request…";const {error}=await client.auth.resetPasswordForEmail($("forgotEmail").value.trim());status.textContent=error?error.message:"If this address belongs to an administrator, a recovery email will be sent. Check your inbox and spam folder."});
  $("resetForm").addEventListener("submit",async e=>{e.preventDefault();const password=$("resetPassword").value;if(password.length<12||password!==$("resetConfirm").value){status.textContent="Passwords must match and contain at least 12 characters.";return}status.textContent="Updating password…";const {error}=await client.auth.updateUser({password});if(error){status.textContent=error.message;return}await client.auth.signOut();show("loginPanel");status.textContent="Password updated. You can now sign in with your new password."});
