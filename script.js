@@ -119,6 +119,21 @@ function fillSettings(){$("restaurantPhone").value=settings.phone||"";$("restaur
 $("settingsForm").addEventListener("submit",async e=>{e.preventDefault();const updated={phone:$("restaurantPhone").value.trim(),whatsapp_phone:$("restaurantWhatsApp").value.trim(),email:$("restaurantEmail").value.trim(),address:$("restaurantAddress").value.trim(),hours:$("restaurantHours").value.trim()};try{const result=await adminRequest("/api/settings",{method:"POST",body:updated});settings=result.settings||{...settings,...updated};renderMenu();renderOrders();notify("Contact details saved online")}catch(err){notify(err.message)}});
 $("exportData").addEventListener("click",()=>{const blob=new Blob([JSON.stringify({menu,orders,settings,exportedAt:new Date().toISOString()},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="foodie-place-backup.json";a.click();URL.revokeObjectURL(url);notify("Backup exported")});
 $("clearOrders").addEventListener("click",()=>notify("For safety, orders are retained in the shared database. Update individual order statuses instead."));
+$("customerAccessForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const status=$("customerAccessStatus"),result=$("customerAccessResult");
+  const email=$("customerAdminEmail").value.trim().toLowerCase(),password=$("customerTempPassword").value;
+  if(password.length<12){status.textContent="Use a temporary password of at least 12 characters.";return}
+  status.textContent="Transferring administrator access…";result.hidden=true;
+  try{
+    const data=await adminRequest("/api/admin-customers",{method:"POST",body:{email,password}});
+    result.textContent="Access transferred to "+data.customer.email+". Previous owner access revoked: "+(data.previousOwnersRevoked.length?data.previousOwnersRevoked.join(", "):"No previous owner account found")+". Give the temporary password to the customer privately and ask them to change it immediately.";
+    result.hidden=false;
+    $("customerAccessForm").reset();
+    status.textContent="Transfer completed.";
+  }catch(error){status.textContent=error.message||"Transfer failed."}
+});
+
 $("adminPasswordForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const password=$("adminNewPassword").value,confirmPassword=$("adminConfirmPassword").value,status=$("adminPasswordStatus");
