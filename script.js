@@ -39,23 +39,27 @@ function load(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.
 let menu=[],orders=load(KEY_ORDERS,[]),settings=load(KEY_SETTINGS,defaultSettings),imageLibrary=[];
 let toastTimer;
 const $=id=>document.getElementById(id);
-let adminAuthenticated = sessionStorage.getItem("foodie_admin_authenticated") === "1";
+let adminAuthenticated = false;
 async function adminRequest(path,options={}){
   const protectedCall=options.protected!==false;
-  const request=()=>fetch(path,{method:options.method||"GET",credentials:"same-origin",headers:options.body?{"Content-Type":"application/json"}:{},...(options.body?{body:JSON.stringify(options.body)}:{})});
-  let response=await request();
-  if(response.status===401&&protectedCall){
-    const key=prompt("Sign in to restaurant administration. Enter your private FOODIE_ADMIN_KEY:");
-    if(!key||!key.trim())throw new Error("Admin sign-in was cancelled.");
-    const login=await fetch("/api/admin-session",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({key:key.trim()})});
-    let loginData={};try{loginData=await login.json()}catch(_){}
-    if(!login.ok)throw new Error(loginData.error||"Admin sign-in failed.");
-    adminAuthenticated=true;sessionStorage.setItem("foodie_admin_authenticated","1");
-    response=await request();
+  const ready=await window.foodieAdminAuth.ready;
+  if(!ready)throw new Error("Please sign in to continue.");
+  const headers=options.body?{"Content-Type":"application/json"}:{};
+  if(protectedCall){
+    const token=await window.foodieAdminAuth.getAccessToken();
+    if(!token)throw new Error("Your administrator session has expired. Please sign in again.");
+    headers.Authorization="Bearer "+token;
   }
+  const response=await fetch(path,{method:options.method||"GET",credentials:"same-origin",headers,...(options.body?{body:JSON.stringify(options.body)}:{})});
   let data={};try{data=await response.json()}catch(_){}
-  if(response.status===401&&protectedCall){adminAuthenticated=false;sessionStorage.removeItem("foodie_admin_authenticated");throw new Error(data.error||"Your admin session expired. Please sign in again.")}
+  if(response.status===401&&protectedCall){
+    adminAuthenticated=false;
+    await window.foodieAdminAuth.signOut();
+    window.location.replace("/login.html");
+    throw new Error(data.error||"Please sign in again.");
+  }
   if(!response.ok)throw new Error(data.error||"Server request failed.");
+  if(protectedCall)adminAuthenticated=true;
   return data;
 }
 
@@ -67,7 +71,7 @@ function go(view){document.querySelectorAll(".view").forEach(v=>v.classList.togg
 $("nav").addEventListener("click",e=>{const b=e.target.closest("[data-view]");if(b)go(b.dataset.view)});
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
 $("mobileMenu").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
-$("adminSignOut").addEventListener("click",async()=>{try{await fetch("/api/admin-session",{method:"DELETE",credentials:"same-origin"});adminAuthenticated=false;sessionStorage.removeItem("foodie_admin_authenticated");notify("You have signed out.");setTimeout(()=>window.location.href="/",350)}catch(_){notify("Could not sign out. Please close this tab.")}});
+$("adminSignOut").addEventListener("click",async()=>{try{await window.foodieAdminAuth.signOut();adminAuthenticated=false;window.location.href="/login.html"}catch(_){notify("Could not sign out. Please close this tab.")}});
 function renderStats(){const valid=orders.filter(o=>o.status!=="Cancelled");$("statOrders").textContent=orders.length;$("statRevenue").textContent=money(valid.reduce((s,o)=>s+Number(o.total||0),0));$("statPending").textContent=orders.filter(o=>["Pending","Preparing","Ready"].includes(o.status)).length;$("statMenu").textContent=menu.filter(d=>d.category!=="Combo Deal").length;$("navOrderCount").textContent=orders.filter(o=>["Pending","Preparing"].includes(o.status)).length}
 function renderMenu(){const q=$("menuSearch").value.toLowerCase(),cat=$("menuCategory").value;const list=menu.filter(d=>d.category!=="Combo Deal"&&(d.name+" "+d.description+" "+d.category).toLowerCase().includes(q)&&(cat==="All"||d.category===cat));$("menuRows").innerHTML=list.map(d=>`<tr><td><div class="dish"><img src="${escapeHTML(d.image||"")}" alt="" onerror="this.style.visibility='hidden'"><div><strong>${escapeHTML(d.name)}</strong><small>${escapeHTML(d.description||"No description")}</small></div></div></td><td>${escapeHTML(d.category)}</td><td><strong>${money(d.price)}</strong></td><td><span class="status ${d.available?"Delivered":"Cancelled"}">${d.available?"Available":"Unavailable"}</span></td><td><div class="row-actions"><button class="btn secondary small" data-edit="${escapeHTML(d.id)}">Edit</button><button class="btn danger small" data-delete="${escapeHTML(d.id)}">Delete</button></div></td></tr>`).join("");$("menuEmpty").style.display=list.length?"none":"block";renderStats()}
 $("menuSearch").addEventListener("input",renderMenu);$("menuCategory").addEventListener("change",renderMenu);
@@ -115,6 +119,15 @@ function fillSettings(){$("restaurantPhone").value=settings.phone||"";$("restaur
 $("settingsForm").addEventListener("submit",async e=>{e.preventDefault();const updated={phone:$("restaurantPhone").value.trim(),whatsapp_phone:$("restaurantWhatsApp").value.trim(),email:$("restaurantEmail").value.trim(),address:$("restaurantAddress").value.trim(),hours:$("restaurantHours").value.trim()};try{const result=await adminRequest("/api/settings",{method:"POST",body:updated});settings=result.settings||{...settings,...updated};renderMenu();renderOrders();notify("Contact details saved online")}catch(err){notify(err.message)}});
 $("exportData").addEventListener("click",()=>{const blob=new Blob([JSON.stringify({menu,orders,settings,exportedAt:new Date().toISOString()},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="foodie-place-backup.json";a.click();URL.revokeObjectURL(url);notify("Backup exported")});
 $("clearOrders").addEventListener("click",()=>notify("For safety, orders are retained in the shared database. Update individual order statuses instead."));
+$("adminPasswordForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const password=$("adminNewPassword").value,confirmPassword=$("adminConfirmPassword").value,status=$("adminPasswordStatus");
+  if(password.length<12||password!==confirmPassword){status.textContent="Passwords must match and contain at least 12 characters.";return}
+  status.textContent="Updating password…";
+  try{const {error}=await window.foodieAdminAuth.client.auth.updateUser({password});if(error)throw error;$("adminPasswordForm").reset();status.textContent="Administrator password updated successfully."}
+  catch(error){status.textContent=error.message||"Could not update password."}
+});
+
 $("storageLabel").textContent="Connecting to shared Supabase database…";
 renderMenu();renderDealsAdmin();renderOrders();fillSettings();renderImageLibrary();
 (async()=>{try{const [mr,sr,or]=await Promise.all([adminRequest("/api/menu",{protected:false}),adminRequest("/api/settings",{protected:false}),adminRequest("/api/orders")]);menu=mr.items||[];settings=sr.settings||settings;orders=or.orders||[];$("storageLabel").textContent="Connected · shared Supabase database";renderMenu();renderDealsAdmin();renderOrders();fillSettings();refreshOtpRequests()}catch(err){$("storageLabel").textContent="Database connection needs attention";notify(err.message)}})();
