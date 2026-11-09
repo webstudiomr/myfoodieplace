@@ -81,6 +81,16 @@
           <div class="field full"><button class="btn" type="submit">Save Contact Details</button><p class="small-note">Only phone, WhatsApp, email, address and opening hours can be changed here. Restaurant name, logo, currency and ordering settings are protected.</p></div>
         </form>
       </div>
+      <div class="panel" id="developerToolsPanel" hidden>
+        <div class="panel-head"><h2>MR WebStudio · Customer Access Transfer</h2></div>
+        <p class="small-note">Developer-only control. Create or replace the restaurant owner's login. The previous restaurant owner's access is revoked; restaurant data remains untouched.</p>
+        <form id="customerAccessForm" class="form-grid">
+          <div class="field"><label for="customerAdminEmail">New customer email</label><input id="customerAdminEmail" type="email" autocomplete="off" required placeholder="customer@example.com"></div>
+          <div class="field"><label for="customerTempPassword">Temporary password (12+ characters)</label><input id="customerTempPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></div>
+          <div class="field full"><button class="btn" type="submit">Transfer administrator access</button><p class="small-note" id="customerAccessStatus" aria-live="polite"></p></div>
+        </form>
+        <div id="customerAccessResult" hidden class="notice" style="margin-top:12px"></div>
+      </div>
       <div class="panel"><div class="panel-head"><h2>Administrator Security</h2></div>
         <p class="small-note">Change the password for your signed-in administrator account. Use “Forgot your password?” on the sign-in page if you cannot access your account.</p>
         <form id="adminPasswordForm" class="form-grid">
