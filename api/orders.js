@@ -60,12 +60,12 @@ export default async function handler(req, res) {
       return send(res, 201, {order:{id,total,status:"Pending",tracking_token:trackingToken}});
     }
     if (req.method === "GET") {
-      if (!requireAdmin(req, res)) return;
+      if (!(await requireAdmin(req, res))) return;
       const rows = await db("orders", "select=*&order=created_at.desc");
       return send(res, 200, {orders:rows});
     }
     if (req.method === "PATCH") {
-      if (!requireAdmin(req, res)) return;
+      if (!(await requireAdmin(req, res))) return;
       const {id,status} = req.body || {};
       if (!id || !statuses.has(status)) return send(res, 400, {error:"Valid order ID and status are required."});
       const rows = await db("orders", `id=eq.${encodeURIComponent(String(id))}`, {method:"PATCH",body:{status},prefer:"return=representation"});
