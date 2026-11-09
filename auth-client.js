@@ -15,6 +15,9 @@
       if(!session){location.replace("/login.html");return false;}
       const check=await fetch("/api/admin-session",{headers:{Authorization:"Bearer "+session.access_token},cache:"no-store"});
       if(!check.ok){await client.auth.signOut();location.replace("/login.html");return false;}
+      const sessionInfo=await check.json().catch(()=>({}));
+      const developerPanel=document.getElementById("developerToolsPanel");
+      if(developerPanel)developerPanel.hidden=sessionInfo.user?.role!=="developer";
       const app=document.querySelector(".admin-page .app");if(app)app.style.display="";
     }
     return true;
