@@ -1,3 +1,4 @@
+[![devs.surf](https://devs.surf/badges/subdomain.svg)](https://ballal.devs.surf)
 # Foodie Place
 
 Customer website and restaurant admin dashboard. The live app is deployed on Vercel and uses Supabase for shared menu, order and restaurant settings data.
