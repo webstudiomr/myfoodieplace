@@ -12,12 +12,14 @@
 <form id="forgotForm"><div class="field"><label for="forgotEmail">Administrator email</label><input id="forgotEmail" type="email" autocomplete="email" required></div><button class="btn" type="submit">Send recovery link</button></form><button class="auth-link" id="backForgot" type="button">Back to sign in</button></section>
 <section id="resetPanel" class="auth-hidden"><h1>Choose a new password</h1><p>Use at least 12 characters.</p>
 <form id="resetForm"><div class="field"><label for="resetPassword">New password</label><input id="resetPassword" type="password" minlength="12" autocomplete="new-password" required></div><div class="field"><label for="resetConfirm">Confirm new password</label><input id="resetConfirm" type="password" minlength="12" autocomplete="new-password" required></div><button class="btn" type="submit">Save new password</button></form></section>
+<section id="firstLoginPanel" class="auth-hidden"><h1>Set your own password</h1><p>For your security, you must replace the temporary password before opening the administrator dashboard.</p>
+<form id="firstLoginForm"><div class="field"><label for="firstLoginPassword">New password</label><input id="firstLoginPassword" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></div><div class="field"><label for="firstLoginConfirm">Confirm new password</label><input id="firstLoginConfirm" type="password" minlength="12" maxlength="128" autocomplete="new-password" required></div><button class="btn" type="submit">Save password and continue</button></form></section>
 <p id="authStatus" class="auth-status" role="status" aria-live="polite"></p>
 </section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="auth-client.js"></script>
 <script>
 (async function(){
- const $=id=>document.getElementById(id),status=$("authStatus"),show=id=>["loginPanel","forgotPanel","resetPanel"].forEach(x=>$(x).classList.toggle("auth-hidden",x!==id));
+ const $=id=>document.getElementById(id),status=$("authStatus"),show=id=>["loginPanel","forgotPanel","resetPanel","firstLoginPanel"].forEach(x=>$(x).classList.toggle("auth-hidden",x!==id));
  if(!(await window.foodieAdminAuth.ready)){status.textContent=status.textContent||"Authentication could not be initialized.";return}
  const client=window.foodieAdminAuth.client;if(!client){status.textContent="Authentication is unavailable.";return}
  async function enterAdmin(){
@@ -25,6 +27,7 @@
   const response=await fetch("/api/admin-bootstrap",{method:"POST",headers:{Authorization:"Bearer "+session.access_token}});
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(data.error||"This email is not authorised for this restaurant.");
+  if(data.mustChangePassword){show("firstLoginPanel");status.textContent="Your temporary password must be replaced before you can continue.";return;}
   const check=await fetch("/api/admin-session",{headers:{Authorization:"Bearer "+session.access_token}});
   if(!check.ok)throw new Error("Administrator access could not be verified.");
   location.replace("/admin.html");
@@ -36,6 +39,9 @@
  $("loginForm").addEventListener("submit",async e=>{e.preventDefault();status.textContent="Signing in…";const {error}=await client.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){status.textContent=error.message;return}try{await enterAdmin()}catch(err){await client.auth.signOut();status.textContent=err.message}});
  $("forgotForm").addEventListener("submit",async e=>{e.preventDefault();status.textContent="Sending recovery request…";const {error}=await client.auth.resetPasswordForEmail($("forgotEmail").value.trim());status.textContent=error?error.message:"If this address belongs to an administrator, a recovery email will be sent. Check your inbox and spam folder."});
  $("resetForm").addEventListener("submit",async e=>{e.preventDefault();const password=$("resetPassword").value;if(password.length<12||password!==$("resetConfirm").value){status.textContent="Passwords must match and contain at least 12 characters.";return}status.textContent="Updating password…";const {error}=await client.auth.updateUser({password});if(error){status.textContent=error.message;return}await client.auth.signOut();show("loginPanel");status.textContent="Password updated. You can now sign in with your new password."});
+ $("firstLoginForm").addEventListener("submit",async e=>{e.preventDefault();const password=$("firstLoginPassword").value;if(password.length<12||password!==$("firstLoginConfirm").value){status.textContent="Passwords must match and contain at least 12 characters.";return}const {data:{session}}=await client.auth.getSession();if(!session){show("loginPanel");status.textContent="Your session expired. Sign in again with your temporary password.";return}status.textContent="Securing your new password…";const response=await fetch("/api/admin-password-change",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},body:JSON.stringify({password})});const result=await response.json().catch(()=>({}));if(!response.ok){status.textContent=result.error||"Could not update your password. Please try again.";return}const refreshed=await client.auth.refreshSession();if(refreshed.error){await client.auth.signOut();show("loginPanel");status.textContent="Password changed. Please sign in again with your new password.";return}location.replace("/admin.html")});
+ const forcePassword=new URLSearchParams(location.search).get("forcePassword")==="1";
+ if(forcePassword){const {data:{session}}=await client.auth.getSession();if(session){show("firstLoginPanel");status.textContent="Change your temporary password to continue.";}else{show("loginPanel");status.textContent="Your session is missing. Sign in with your temporary password first.";}}
  client.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"&&session)show("resetPanel")});
 })();
 </script></body></html>
